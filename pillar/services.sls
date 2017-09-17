@@ -5,7 +5,7 @@ services:
     port: 8181
   - name: radarr.lan
     port: 7878
-  - name: sonarr
+  - name: sonarr.lan
     port: 8989
   - name: transmission.lan
     port: 9091
