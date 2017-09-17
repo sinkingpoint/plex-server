@@ -4,4 +4,5 @@ unbound:
    - source: salt://unbound.conf
    - template: jinja
    - context:
-     services: {{pillar.get('services', {})}}
+       hostname: {{salt['network.get_hostname']()}}
+       services: {{pillar.get('services', {})}}
