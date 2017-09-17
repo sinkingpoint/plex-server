@@ -18,6 +18,8 @@ services:
       - OPENVPN_USERNAME=${VPN_USERNAME}
       - OPENVPN_PASSWORD=${VPN_PASSWORD}
       - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60
+      - PGID=1000
+      - PUID=1000
     volumes:
       - ${MOUNT_POINT}/media/Downloads:/data
       - /etc/localtime:/etc/localtime:ro
