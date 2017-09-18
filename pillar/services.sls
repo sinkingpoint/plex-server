@@ -9,3 +9,5 @@ services:
     port: 8989
   - name: transmission.lan
     port: 9091
+  - name: jackett.lan
+    port: 9117
