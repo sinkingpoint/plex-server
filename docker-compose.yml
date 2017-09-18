@@ -37,7 +37,7 @@ services:
       - TZ=Europe/London
     volumes:
       - ${MOUNT_POINT}/radarr:/config
-      - ${MOUNT_POINT}/media/Downloads/completed:/downloads
+      - ${MOUNT_POINT}/media/Downloads/completed:/data/completed
       - ${MOUNT_POINT}/media/Movies:/movies
   sonarr:
     image: linuxserver/sonarr
@@ -53,8 +53,8 @@ services:
       - TZ=Europe/London
     volumes:
       - ${MOUNT_POINT}/sonarr:/config
-      - ${MOUNT_POINT}/plex/"TV Shows":/tv
-      - ${MOUNT_POINT}/Downloads/completed:/downloads
+      - ${MOUNT_POINT}/media/"TV Shows":/tv
+      - ${MOUNT_POINT}/media/Downloads/completed:/data/completed
   jackett:
     image: linuxserver/jackett
     container_name: jackett
