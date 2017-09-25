@@ -121,6 +121,14 @@ services:
     volumes:
       - ${MOUNT_POINT}/plex/config:/config
       - ${MOUNT_POINT}plex/logs:/logs:ro
+  mattermost:
+    image: mattermost/mattermost-preview
+    container_name: mattermost
+    restart: always
+    ports:
+      - 8065:8065
+    networks:
+      - plexnet
 networks:
   plexnet:
     driver: bridge
