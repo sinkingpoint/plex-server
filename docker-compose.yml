@@ -121,33 +121,53 @@ services:
     volumes:
       - ${MOUNT_POINT}/plex/config:/config
       - ${MOUNT_POINT}plex/logs:/logs:ro
-  mysql:
+  wikidb:
+    container_name: wikidb
     image: mysql:5.7.12
     environment:
-    - MYSQL_ROOT_PASSWORD=${WIKI_DB_PASSWORD}
-    - MYSQL_DATABASE=${WIKI_DB}
-    - MYSQL_USER=${WIKI_DB_USER}
-    - MYSQL_PASSWORD=${WIKI_DB_USER_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${WIKI_DB_PASSWORD}
+      - MYSQL_DATABASE=${WIKI_DB}
+      - MYSQL_USER=${WIKI_DB_USER}
+      - MYSQL_PASSWORD=${WIKI_DB_USER_PASSWORD}
     volumes:
-    - mysql-data:/var/lib/mysql
+      - mysql-data:/var/lib/mysql
     networks:
       - wikinet
   bookstack:
+    container_name: wiki
     image: solidnerd/bookstack:0.18.3
     depends_on:
-    - mysql
+      - wikidb
     environment:
-    - DB_HOST=mysql:3306
-    - DB_DATABASE=${WIKI_DB}
-    - DB_USERNAME=${WIKI_DB_USER}
-    - DB_PASSWORD=${WIKI_DB_USER_PASSWORD}
+      - DB_HOST=mysql:3306
+      - DB_DATABASE=${WIKI_DB}
+      - DB_USERNAME=${WIKI_DB_USER}
+      - DB_PASSWORD=${WIKI_DB_USER_PASSWORD}
     networks:
       - wikinet
     volumes:
-    - uploads:${MOUNT_POINT}/bookstack/public/uploads
-    - storage-uploads:${MOUNT_POINT}/bookstack/public/storage
+      - ${MOUNT_POINT}/wiki/uploads:/var/www/bookstack/public/uploads
+      - ${MOUNT_POINT}/wiki/storage-uploads:/var/www/bookstack/public/storage
     ports:
       - "8037:80"
+  owncloud_db:
+    container_name: owncloud_db
+    image: mariadb:10.1
+    restart: always
+    networks:
+      - owncloudnet
+    environment:
+      MYSQL_ROOT_PASSWORD: ${OWNCLOUD_DB_PASSWORD}
+  owncloud:
+    container_name: owncloud
+    image: owncloud
+    restart: always
+    networks:
+      - owncloudnet
+    volumes:
+      - ${MOUNT_POINT}/drive:/var/www/html
+    ports:
+      - "8038:80"
 volumes:
  mysql-data:
  uploads:
@@ -156,4 +176,6 @@ networks:
   plexnet:
     driver: bridge
   wikinet:
+    driver: bridge
+  owncloudnet:
     driver: bridge

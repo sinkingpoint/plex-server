@@ -13,3 +13,5 @@ services:
     port: 9117
   - name: wiki.lan
     port: 8037
+  - name: drive.lan
+    port: 8038
