@@ -11,5 +11,5 @@ services:
     port: 9091
   - name: jackett.lan
     port: 9117
-  - name: chat.lan
-    port: 8065
+  - name: wiki.lan
+    port: 8037

@@ -121,14 +121,39 @@ services:
     volumes:
       - ${MOUNT_POINT}/plex/config:/config
       - ${MOUNT_POINT}plex/logs:/logs:ro
-  mattermost:
-    image: mattermost/mattermost-preview
-    container_name: mattermost
-    restart: always
-    ports:
-      - 8065:8065
+  mysql:
+    image: mysql:5.7.12
+    environment:
+    - MYSQL_ROOT_PASSWORD=${WIKI_DB_PASSWORD}
+    - MYSQL_DATABASE=${WIKI_DB}
+    - MYSQL_USER=${WIKI_DB_USER}
+    - MYSQL_PASSWORD=${WIKI_DB_USER_PASSWORD}
+    volumes:
+    - mysql-data:/var/lib/mysql
     networks:
-      - plexnet
+      - wikinet
+  bookstack:
+    image: solidnerd/bookstack:0.18.3
+    depends_on:
+    - mysql
+    environment:
+    - DB_HOST=mysql:3306
+    - DB_DATABASE=${WIKI_DB}
+    - DB_USERNAME=${WIKI_DB_USER}
+    - DB_PASSWORD=${WIKI_DB_USER_PASSWORD}
+    networks:
+      - wikinet
+    volumes:
+    - uploads:${MOUNT_POINT}/bookstack/public/uploads
+    - storage-uploads:${MOUNT_POINT}/bookstack/public/storage
+    ports:
+      - "8037:80"
+volumes:
+ mysql-data:
+ uploads:
+ storage-uploads:
 networks:
   plexnet:
+    driver: bridge
+  wikinet:
     driver: bridge
