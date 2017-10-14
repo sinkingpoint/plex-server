@@ -1,17 +1,17 @@
 services:
-  - name: plex.lan
+  - name: plex
     port: 32400
-  - name: plexpy.lan
+  - name: plexpy
     port: 8181
-  - name: radarr.lan
+  - name: radarr
     port: 7878
-  - name: sonarr.lan
+  - name: sonarr
     port: 8989
-  - name: transmission.lan
+  - name: transmission
     port: 9091
-  - name: jackett.lan
+  - name: jackett
     port: 9117
-  - name: wiki.lan
+  - name: wiki
     port: 8037
-  - name: drive.lan
+  - name: drive
     port: 8038

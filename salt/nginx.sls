@@ -12,21 +12,36 @@ nginx:
       {% endfor %}
 
 {% for service in pillar.get('services', {}) %}
-{{service['name']}}-available:
+{{service['name']}}-lan-available:
   file.managed:
-    - name: /etc/nginx/sites-available/{{service['name']}}
+    - name: /etc/nginx/sites-available/{{service['name']}}-lan
     - source: salt://nginx-proxy.conf
     - template: jinja
     - context:
-      service_name: {{service['name']}}
+      service_name: {{service['name']}}.lan
+      service_port: {{service['port']}}
+    - require:
+       - pkg: nginx
+{{service['name']}}-sinkingpoint-available:
+  file.managed:
+    - name: /etc/nginx/sites-available/{{service['name']}}-sinkingpoint
+    - source: salt://nginx-proxy.conf
+    - template: jinja
+    - context:
+      service_name: {{service['name']}}.sinkingpoint.com
       service_port: {{service['port']}}
     - require:
        - pkg: nginx
 
-{{service['name']}}-enabled:
+{{service['name']}}-lan-enabled:
   file.symlink:
-    - name: /etc/nginx/sites-enabled/{{service['name']}}
-    - target: /etc/nginx/sites-available/{{service['name']}}
+    - name: /etc/nginx/sites-enabled/{{service['name']}}-lan
+    - target: /etc/nginx/sites-available/{{service['name']}}-lan
+
+{{service['name']}}-sinkingpoint-enabled:
+  file.symlink:
+    - name: /etc/nginx/sites-enabled/{{service['name']}}-sinkingpoint
+    - target: /etc/nginx/sites-available/{{service['name']}}-sinkingpoint
 {% endfor %}
 
 
