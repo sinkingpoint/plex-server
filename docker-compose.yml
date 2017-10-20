@@ -53,7 +53,7 @@ services:
       - TZ=Europe/London
     volumes:
       - ${MOUNT_POINT}/sonarr:/config
-      - ${MOUNT_POINT}/media/"TV Shows":/tv
+      - ${MOUNT_POINT}/media/TV Shows:/tv
       - ${MOUNT_POINT}/media/Downloads/completed:/data/completed
   jackett:
     image: linuxserver/jackett
