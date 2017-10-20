@@ -139,7 +139,7 @@ services:
     depends_on:
       - wikidb
     environment:
-      - DB_HOST=mysql:3306
+      - DB_HOST=wikidb:3306
       - DB_DATABASE=${WIKI_DB}
       - DB_USERNAME=${WIKI_DB_USER}
       - DB_PASSWORD=${WIKI_DB_USER_PASSWORD}
