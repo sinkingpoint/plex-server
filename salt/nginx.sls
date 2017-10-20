@@ -8,7 +8,8 @@ nginx:
     - watch:
       - pkg: nginx
       {% for service in pillar.get('services', {}) %}
-      - file: {{service['name']}}-enabled
+      - file: {{service['name']}}-lan-available
+      - file: {{service['name']}}-sinkingpoint-available
       {% endfor %}
 
 {% for service in pillar.get('services', {}) %}
