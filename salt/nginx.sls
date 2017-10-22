@@ -8,11 +8,14 @@ nginx:
     - watch:
       - pkg: nginx
       {% for service in pillar.get('services', {}) %}
+      {%- if 'port' in service: %}
       - file: {{service['name']}}-lan-available
       - file: {{service['name']}}-sinkingpoint-available
+      {%- endif %}
       {% endfor %}
 
 {% for service in pillar.get('services', {}) %}
+{%- if 'port' in service: %}
 {{service['name']}}-lan-available:
   file.managed:
     - name: /etc/nginx/sites-available/{{service['name']}}-lan
@@ -43,6 +46,7 @@ nginx:
   file.symlink:
     - name: /etc/nginx/sites-enabled/{{service['name']}}-sinkingpoint
     - target: /etc/nginx/sites-available/{{service['name']}}-sinkingpoint
+{%- endif %}
 {% endfor %}
 
 

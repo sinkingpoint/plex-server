@@ -1,181 +1,50 @@
 version: "2"
 
 services:
-  transmission:
-    image: haugene/transmission-openvpn
-    container_name: transmission-openvpn
-    restart: always
-    cap_add:
-      - NET_ADMIN
-    privileged: true
-    ports:
-      - "9091:9091"
-    networks:
-      - plexnet
-    environment:
-      - OPENVPN_PROVIDER=${VPN_PROVIDER}
-      - OPENVPN_CONFIG=${VPN_CONFIG}
-      - OPENVPN_USERNAME=${VPN_USERNAME}
-      - OPENVPN_PASSWORD=${VPN_PASSWORD}
-      - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60
-      - PGID=1000
-      - PUID=1000
-    volumes:
-      - ${MOUNT_POINT}/media/Downloads:/data
-      - /etc/localtime:/etc/localtime:ro
-  radarr:
-    image: linuxserver/radarr
-    container_name: radarr
-    restart: always
-    ports:
-      - "7878:7878"
-    networks:
-      - plexnet
-    environment:
-      - PGID=1000
-      - PUID=1000
-      - TZ=Europe/London
-    volumes:
-      - ${MOUNT_POINT}/radarr:/config
-      - ${MOUNT_POINT}/media/Downloads/completed:/data/completed
-      - ${MOUNT_POINT}/media/Movies:/movies
-  sonarr:
-    image: linuxserver/sonarr
-    container_name: sonarr
-    restart: always
-    ports:
-      - "8989:8989"
-    networks:
-      - plexnet
-    environment:
-      - PGID=1000
-      - PUID=1000
-      - TZ=Europe/London
-    volumes:
-      - ${MOUNT_POINT}/sonarr:/config
-      - ${MOUNT_POINT}/media/TV Shows:/tv
-      - ${MOUNT_POINT}/media/Downloads/completed:/data/completed
-  jackett:
-    image: linuxserver/jackett
-    container_name: jackett
-    restart: always
-    networks:
-      - plexnet
-    environment:
-      - PGID=1000
-      - PUID=1000
-      - TZ=Europe/London
-    volumes:
-      - ${MOUNT_POINT}/jackett:/config
-      - ${MOUNT_POINT}/jackett/downloads:/downloads
-    ports:
-      - "9117:9117"
-  plex:
-    image: linuxserver/plex
-    container_name: plex
-    restart: always
-    ports:
-      - "32400:32400"
-      - "1900:1900"
-      - "3005:3005"
-      - "5353:5353"
-      - "8324:8324"
-      - "32410:32410"
-      - "32412:32412"
-      - "32413:32413"
-      - "32414:32414"
-      - "32469:32469"
-    network_mode: "host"
-    environment:
-      - PGID=1000
-      - PUID=1000
-      - TZ=Europe/London
-      - VERSION=latest
-    volumes:
-      - ${MOUNT_POINT}/plex/config:/config
-      - ${MOUNT_POINT}/media:/data
-      - ${MOUNT_POINT}/plex/logs:/config/Library/Application Support/Plex Media Server/Logs
-      - ${MOUNT_POINT}/plex/transcode:/transcode
-  unbound:
-    image: mvance/unbound:latest
-    container_name: unbound
-    restart: always
-    ports: 
-      - 53:53/udp
-    networks:
-      - plexnet
-    volumes:
-      - ${MOUNT_POINT}/unbound/a-records.conf:/opt/unbound/etc/unbound/a-records.conf:ro
-  plexpy:
-    image: linuxserver/plexpy
-    container_name: plexpy
-    restart: always
-    ports: 
-      - 8181:8181
-    networks:
-      - plexnet
-    environment:
-      - PGID=1000
-      - PUID=1000
-      - TZ=Europe/London
-    volumes:
-      - ${MOUNT_POINT}/plex/config:/config
-      - ${MOUNT_POINT}plex/logs:/logs:ro
-  wikidb:
-    container_name: wikidb
-    image: mysql:5.7.12
-    environment:
-      - MYSQL_ROOT_PASSWORD=${WIKI_DB_PASSWORD}
-      - MYSQL_DATABASE=${WIKI_DB}
-      - MYSQL_USER=${WIKI_DB_USER}
-      - MYSQL_PASSWORD=${WIKI_DB_USER_PASSWORD}
-    volumes:
-      - mysql-data:/var/lib/mysql
-    networks:
-      - wikinet
-  bookstack:
-    container_name: wiki
-    image: solidnerd/bookstack:0.18.3
-    depends_on:
-      - wikidb
-    environment:
-      - DB_HOST=wikidb:3306
-      - DB_DATABASE=${WIKI_DB}
-      - DB_USERNAME=${WIKI_DB_USER}
-      - DB_PASSWORD=${WIKI_DB_USER_PASSWORD}
-    networks:
-      - wikinet
-    volumes:
-      - ${MOUNT_POINT}/wiki/uploads:/var/www/bookstack/public/uploads
-      - ${MOUNT_POINT}/wiki/storage-uploads:/var/www/bookstack/public/storage
-    ports:
-      - "8037:80"
-  owncloud_db:
-    container_name: owncloud_db
-    image: mariadb:10.1
-    restart: always
-    networks:
-      - owncloudnet
-    environment:
-      MYSQL_ROOT_PASSWORD: ${OWNCLOUD_DB_PASSWORD}
-  owncloud:
-    container_name: owncloud
-    image: owncloud
-    restart: always
-    networks:
-      - owncloudnet
-    volumes:
-      - ${MOUNT_POINT}/drive:/var/www/html
-    ports:
-      - "8038:80"
-volumes:
- mysql-data:
- uploads:
- storage-uploads:
+    {%- for service in services: %}
+    {{service['name']}}:
+        container_name: {{service['name']}}
+        image: {{service['image']}}
+        restart: always
+        {%- if 'extra_docker_args' in service: %}
+        {%- for arg, value in service['extra_docker_args'].items() %}
+        {%- if value is string: %}
+        {{arg}}: {{value|yaml_encode}}
+        {%- elif value is iterable: %}
+        {{arg}}:
+            {%- for item in value %}
+            - {{item|yaml_encode}}
+            {%- endfor %}
+        {%- else: %}
+        {{arg}}: {{value|yaml_encode}}
+        {%- endif %}
+        {%- endfor %}
+        {%- endif %}
+        {%- if 'mapped_ports' in service: %}
+        ports:
+            {%- for port in service['mapped_ports']: %}
+            - {{port}}
+            {%- endfor %}
+        {%- endif %}
+        {%- if 'environment' in service: %}
+        environment:
+            {%- for var in service['environment']: %}
+            - {{var}}
+            {%- endfor %}
+        {%- endif %}
+        {%- if 'volumes' in service: %}
+        volumes:
+            {%- for volume in service['volumes']: %}
+            - {{volume}}
+            {%- endfor %}
+        {%- endif %}
+        {%- if 'lan' in service: %}
+        networks:
+            - {{service['lan']}}
+        {%- endif %}
+    {%- endfor %}
 networks:
-  plexnet:
-    driver: bridge
-  wikinet:
-    driver: bridge
-  owncloudnet:
-    driver: bridge
+    {%- for network in networks: %}
+    {{network}}:
+        driver: bridge
+    {%- endfor %}

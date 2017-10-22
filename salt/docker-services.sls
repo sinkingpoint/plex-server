@@ -2,6 +2,9 @@
   file.managed:
     - source: salt://docker-compose.yml
     - template: jinja
+    - context:
+        services: {{pillar.get('services', {})}}
+        networks: {{pillar.get('networks', {})}}
 
 docker-services:
   module.run:
